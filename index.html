@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Sentinel - AI Deepfake Detection</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background-animation">
+        <canvas id="neural-network"></canvas>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                <span class="logo-text">Neural<span class="highlight">Sentinel</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#technology">Technology</a>
+                <a href="#team">Team</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">⚡</span>
+                <span>V Semester Mini Project 2025-26</span>
+            </div>
+            <h1 class="hero-title">
+                Defend Against
+                <span class="gradient-text">Digital Deception</span>
+            </h1>
+            <p class="hero-subtitle">
+                Advanced AI-powered deepfake detection with <span class="accuracy-highlight">92.5% accuracy</span>
+            </p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="92.5">0</div>
+                    <div class="stat-label">Accuracy %</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="3">0</div>
+                    <div class="stat-label">CNN Models</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="10">0</div>
+                    <div class="stat-label">Frames/Video</div>
+                </div>
+            </div>
+            <a href="#detector" class="cta-button">
+                <span>Start Detection</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </a>
+        </div>
+        <div class="hero-visual">
+            <div class="hologram-container">
+                <div class="hologram-circle"></div>
+                <div class="hologram-circle"></div>
+                <div class="hologram-circle"></div>
+                <div class="scan-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detector Section -->
+    <section id="detector" class="detector-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Upload for Analysis</h2>
+                <p class="section-subtitle">Supports images (JPG, PNG) and videos (MP4, MOV, AVI)</p>
+            </div>
+
+            <div class="detector-container">
+                <!-- Upload Area -->
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept="image/*,video/*" hidden>
+                    <div class="upload-content" id="uploadContent">
+                        <div class="upload-icon">
+                            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                                <circle cx="40" cy="40" r="38" stroke="url(#gradient1)" stroke-width="2"/>
+                                <path d="M40 20V60M20 40H60" stroke="url(#gradient1)" stroke-width="3" stroke-linecap="round"/>
+                                <defs>
+                                    <linearGradient id="gradient1" x1="0" y1="0" x2="80" y2="80">
+                                        <stop offset="0%" stop-color="#00f2ff"/>
+                                        <stop offset="100%" stop-color="#b620ff"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <h3>Drop your file here</h3>
+                        <p>or click to browse</p>
+                        <div class="supported-formats">
+                            <span class="format-tag">JPG</span>
+                            <span class="format-tag">PNG</span>
+                            <span class="format-tag">MP4</span>
+                            <span class="format-tag">MOV</span>
+                        </div>
+                    </div>
+                    <div class="file-preview" id="filePreview" style="display: none;">
+                        <img id="previewImage" src="" alt="Preview">
+                        <video id="previewVideo" controls style="display: none;"></video>
+                        <div class="preview-info">
+                            <span id="fileName"></span>
+                            <button class="remove-file" id="removeFile">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Button -->
+                <button class="analyze-button" id="analyzeButton" disabled>
+                    <span class="button-text">Analyze with Neural Sentinel</span>
+                    <span class="button-loader" style="display: none;">
+                        <div class="spinner"></div>
+                    </span>
+                </button>
+
+                <!-- Processing Stage Indicator -->
+                <div class="processing-stages" id="processingStages" style="display: none;">
+                    <div class="stage" data-stage="upload">
+                        <div class="stage-icon">📤</div>
+                        <div class="stage-label">Upload</div>
+                        <div class="stage-status"></div>
+                    </div>
+                    <div class="stage-connector"></div>
+                    <div class="stage" data-stage="detection">
+                        <div class="stage-icon">👤</div>
+                        <div class="stage-label">Face Detection</div>
+                        <div class="stage-status"></div>
+                    </div>
+                    <div class="stage-connector"></div>
+                    <div class="stage" data-stage="analysis">
+                        <div class="stage-icon">🧠</div>
+                        <div class="stage-label">CNN Analysis</div>
+                        <div class="stage-status"></div>
+                    </div>
+                    <div class="stage-connector"></div>
+                    <div class="stage" data-stage="results">
+                        <div class="stage-icon">📊</div>
+                        <div class="stage-label">Results</div>
+                        <div class="stage-status"></div>
+                    </div>
+                </div>
+
+                <!-- Results Display -->
+                <div class="results-container" id="resultsContainer" style="display: none;">
+                    <div class="results-card">
+                        <div class="result-header">
+                            <h3>Detection Results</h3>
+                            <div class="result-badge" id="resultBadge"></div>
+                        </div>
+                        
+                        <div class="confidence-display">
+                            <div class="confidence-label">Confidence Score</div>
+                            <div class="confidence-meter">
+                                <svg class="confidence-circle" viewBox="0 0 200 200">
+                                    <circle class="confidence-bg" cx="100" cy="100" r="85"/>
+                                    <circle class="confidence-fill" cx="100" cy="100" r="85" id="confidenceCircle"/>
+                                </svg>
+                                <div class="confidence-value" id="confidenceValue">0%</div>
+                            </div>
+                        </div>
+
+                        <div class="result-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Classification:</span>
+                                <span class="detail-value" id="classification"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Real Probability:</span>
+                                <span class="detail-value" id="realProb"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Fake Probability:</span>
+                                <span class="detail-value" id="fakeProb"></span>
+                            </div>
+                            <div class="detail-row" id="framesAnalyzed" style="display: none;">
+                                <span class="detail-label">Frames Analyzed:</span>
+                                <span class="detail-value" id="framesCount"></span>
+                            </div>
+                        </div>
+
+                        <button class="analyze-another" id="analyzeAnother">
+                            Analyze Another File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Display -->
+                <div class="error-container" id="errorContainer" style="display: none;">
+                    <div class="error-card">
+                        <div class="error-icon">⚠️</div>
+                        <h3>Detection Error</h3>
+                        <p id="errorMessage"></p>
+                        <button class="try-again" id="tryAgain">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Advanced multi-stage deep learning pipeline</p>
+            </div>
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div class="step-icon">📁</div>
+                    <h3>Upload Media</h3>
+                    <p>Upload an image or video file for deepfake analysis</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div class="step-icon">🎯</div>
+                    <h3>Face Detection</h3>
+                    <p>MTCNN extracts facial regions with 90% confidence threshold</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div class="step-icon">🧠</div>
+                    <h3>CNN Analysis</h3>
+                    <p>EfficientNetB0 analyzes patterns at 224x224 resolution</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-card">
+                    <div class="step-number">04</div>
+                    <div class="step-icon">✅</div>
+                    <h3>Results</h3>
+                    <p>Binary classification with confidence scoring</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section id="technology" class="technology">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Technology Stack</h2>
+                <p class="section-subtitle">Powered by cutting-edge AI frameworks</p>
+            </div>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">🔥</div>
+                    <h3>TensorFlow 2.13</h3>
+                    <p>Deep learning framework</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🧠</div>
+                    <h3>Keras</h3>
+                    <p>High-level neural networks API</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">👁️</div>
+                    <h3>OpenCV</h3>
+                    <p>Computer vision library</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">👤</div>
+                    <h3>MTCNN</h3>
+                    <p>Multi-task face detection</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">⚡</div>
+                    <h3>FastAPI</h3>
+                    <p>Modern web framework</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📊</div>
+                    <h3>Scikit-learn</h3>
+                    <p>ML metrics & evaluation</p>
+                  
+                </div>
+            </div>
+
+            <div class="models-comparison">
+                <h3>Model Performance Comparison</h3>
+                <div class="comparison-table">
+                    <div class="table-row header">
+                        <div>Model</div>
+                        <div>Accuracy</div>
+                        <div>Precision</div>
+                        <div>Recall</div>
+                        <div>F1-Score</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="model-name">
+                            <span class="best-badge">BEST</span>
+                            EfficientNetB0
+                        </div>
+                        <div class="metric">92.5%</div>
+                        <div class="metric">91.8%</div>
+                        <div class="metric">93.2%</div>
+                        <div class="metric">92.5%</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="model-name">Xception</div>
+                        <div class="metric">91.2%</div>
+                        <div class="metric">90.5%</div>
+                        <div class="metric">92.0%</div>
+                        <div class="metric">91.2%</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="model-name">Custom CNN</div>
+                        <div class="metric">85.8%</div>
+                        <div class="metric">84.2%</div>
+                        <div class="metric">87.5%</div>
+                        <div class="metric">85.8%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="team">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Our Team</h2>
+            <p class="section-subtitle">V Semester Mini Project 2025-26</p>
+        </div>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar">NP</div>
+                <h3>Nischay Upadhya P</h3>
+                <p class="team-id">1MV23IC039</p>
+                <div class="team-role">Model Implementation</div> </div>
+            <div class="team-card">
+                <div class="team-avatar">SG</div>
+                <h3>Supreeth Gutti</h3>
+                <p class="team-id">1MV23IC058</p>
+                <div class="team-role">API Development</div> </div>
+            <div class="team-card">
+                <div class="team-avatar">KS</div>
+                <h3>Kaushik Raju S</h3>
+                <p class="team-id">1MV23IC046</p>
+                <div class="team-role">Data Analysis</div> </div>
+            <div class="team-card">
+                <div class="team-avatar">NB</div>
+                <h3>Nandeesha B</h3>
+                <p class="team-id">1MV23IC035</p>
+                <div class="team-role">Project Coordination</div> </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <div class="logo-icon">🛡️</div>
+                        <span class="logo-text">Neural<span class="highlight">Sentinel</span></span>
+                    </div>
+                    <p>Advanced AI-powered deepfake detection system</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Project</h4>
+                        <a href="https://github.com/YOUR_USERNAME/deepfake-detection">GitHub</a>
+                        <a href="#documentation">Documentation</a>
+                        <a href="#api">API</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="#datasets">Datasets</a>
+                        <a href="#research">Research Papers</a>
+                        <a href="#models">Models</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Neural Sentinel. V Semester Mini Project.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
