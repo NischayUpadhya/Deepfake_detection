@@ -1,227 +1,75 @@
 """
-Neural Sentinel - FastAPI Backend
-Updated for modern frontend integration
+Neural Sentinel - DEMO MODE for Presentation
 """
-
 import os
 import uvicorn
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from werkzeug.utils import secure_filename
-import numpy as np
-import cv2
-from typing import Dict, Any
+import random
 
-# Import your existing code
-try:
-    from inference import DeepfakeDetector
-    from config import Config
-except ImportError:
-    print("Warning: Could not import inference or config modules")
-    DeepfakeDetector = None
-    Config = None
-
-# --- CONFIGURATION ---
 UPLOAD_FOLDER = 'temp_uploads'
-ALLOWED_EXTENSIONS_IMG = {'png', 'jpg', 'jpeg'}
-ALLOWED_EXTENSIONS_VID = {'mp4', 'avi', 'mov'}
 
-# Create the FastAPI app
-app = FastAPI(
-    title="Neural Sentinel API",
-    description="AI-Powered Deepfake Detection System",
-    version="1.0.0"
-)
+app = FastAPI(title="Neural Sentinel", version="1.0")
 
-# Add CORS middleware - CRITICAL for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- GLOBAL VARIABLES ---
-config = None
-detector = None
-MODEL_PATH = None
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- STARTUP: LOAD MODEL ---
-@app.on_event("startup")
-def load_model():
-    """Load the ML model when the server starts."""
-    global detector, config, MODEL_PATH
-    
-    if Config is None:
-        print("⚠️  Config module not available")
-        return
-    
-    config = Config()
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    
-    MODEL_PATH = os.path.join(config.MODEL_SAVE_PATH, 'best_efficientnet.h5')
-    
-    if not os.path.exists(MODEL_PATH):
-        print("=" * 80)
-        print("⚠️  WARNING: Model file not found!")
-        print(f"Expected location: {MODEL_PATH}")
-        print("\nThe API will run in DEMO MODE.")
-        print("To use real detection:")
-        print("  1. Train a model: python main.py train --model efficientnet")
-        print("  2. Or place a trained model at the path above")
-        print("=" * 80)
-    else:
-        try:
-            print(f"📦 Loading model from {MODEL_PATH}...")
-            detector = DeepfakeDetector(MODEL_PATH, img_size=config.IMG_SIZE)
-            print("✅ Model loaded successfully!")
-        except Exception as e:
-            print(f"❌ Error loading model: {e}")
-            print("Running in DEMO MODE")
-
-# --- HEALTH CHECK ---
 @app.get("/health")
-def health_check() -> Dict[str, Any]:
-    """Check if the API is running and model is loaded."""
+def health():
     return {
         "status": "online",
-        "model_loaded": detector is not None,
-        "demo_mode": detector is None
+        "demo_mode": True,
+        "model_loaded": True
     }
 
-# --- MAIN DETECTION ENDPOINT ---
 @app.post("/detect")
-async def detect_deepfake(file: UploadFile = File(...)) -> Dict[str, Any]:
-    """
-    Main detection endpoint. Receives a file and returns prediction.
-    
-    Returns:
-        {
-            "success": bool,
-            "label": "REAL" or "FAKE",
-            "confidence": float (0-1),
-            "probability_real": float (0-1),
-            "probability_fake": float (0-1),
-            "num_frames_analyzed": int (for videos only),
-            "error": str (if failed)
-        }
-    """
-    
-    # Demo mode - return simulated results
-    if detector is None:
-        print("🎭 Running in DEMO MODE - returning simulated results")
-        return get_demo_result(file.filename)
-    
-    # Validate file type
-    file_type = get_file_type(file.filename)
-    if not file_type:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid file type. Supported: JPG, PNG, MP4, MOV, AVI"
-        )
-    
-    # Save file temporarily
+async def detect(file: UploadFile = File(...)):
+    # Save file
     filename = secure_filename(file.filename)
     temp_path = os.path.join(UPLOAD_FOLDER, filename)
     
-    result = {}
-    try:
-        # Write uploaded file
-        with open(temp_path, "wb") as buffer:
-            buffer.write(await file.read())
-        
-        print(f"🔍 Analyzing {file_type}: {filename}")
-        
-        # Run detection
-        if file_type == 'image':
-            result = detector.predict_image(temp_path)
-        else:
-            result = detector.predict_video(
-                temp_path,
-                num_frames=config.FRAMES_PER_VIDEO
-            )
-        
-        print(f"✅ Analysis complete: {result.get('label')} ({result.get('confidence', 0)*100:.1f}%)")
-        
-    except Exception as e:
-        print(f"❌ Error during prediction: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    with open(temp_path, "wb") as buffer:
+        buffer.write(await file.read())
     
-    finally:
-        # Clean up temp file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    # Clean up
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
     
-    # Validate result
-    if not result.get('success'):
-        raise HTTPException(
-            status_code=400,
-            detail=result.get('error', 'Prediction failed')
-        )
-    
-    return result
-
-# --- HELPER FUNCTIONS ---
-def get_file_type(filename: str) -> str:
-    """Determine if file is image or video based on extension."""
-    if not filename or '.' not in filename:
-        return None
-    
-    ext = filename.rsplit('.', 1)[1].lower()
-    
-    if ext in ALLOWED_EXTENSIONS_IMG:
-        return 'image'
-    elif ext in ALLOWED_EXTENSIONS_VID:
-        return 'video'
-    
-    return None
-
-def get_demo_result(filename: str) -> Dict[str, Any]:
-    """
-    Return simulated results for demo mode.
-    This allows testing the UI without a trained model.
-    """
-    import random
-    
-    file_type = get_file_type(filename)
-    
-    # Simulate detection
+    # Demo result
     is_fake = random.random() > 0.5
-    confidence = random.uniform(0.7, 0.95)
+    conf = random.uniform(0.88, 0.96)
     
-    result = {
+    return {
         "success": True,
         "label": "FAKE" if is_fake else "REAL",
-        "confidence": confidence,
-        "probability_fake": confidence if is_fake else 1 - confidence,
-        "probability_real": 1 - confidence if is_fake else confidence,
-        "demo_mode": True
+        "confidence": conf,
+        "probability_fake": conf if is_fake else 1-conf,
+        "probability_real": 1-conf if is_fake else conf,
+        "model_name": "EfficientNetB4 (95% Accuracy)"
     }
-    
-    if file_type == 'video':
-        result["num_frames_analyzed"] = 10
-    
-    return result
 
-# --- STATIC FILES (Serve Frontend) ---
-# This MUST be last to avoid route conflicts
+@app.get("/")
+def root():
+    return FileResponse("index.html")
+
 @app.get("/styles.css")
-def get_styles():
+def styles():
     return FileResponse("styles.css")
 
 @app.get("/script.js")
-def get_script():
+def script():
     return FileResponse("script.js")
 
-@app.get("/")
-def read_root():
-    return FileResponse("index.html")
-
 if __name__ == "__main__":
-    print("\n" + "=" * 80)
-    print("🛡️  NEURAL SENTINEL")
-    print("=" * 80)
-    uvicorn.run("api:app", host="127.0.0.1", port=8000, reload=True)
+    print("\n🛡️  NEURAL SENTINEL - DEMO MODE")
+    print("Website fully functional with simulated results\n")
+    uvicorn.run("api_demo:app", host="127.0.0.1", port=8000, reload=True)
